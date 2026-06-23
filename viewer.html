@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Logos Tax Systems — Architecture Viewer</title>
+  <style>
+    :root {
+      --navy: #152238;
+      --navy-light: #22314c;
+      --gold: #8a6a16;
+      --gold-bg: #fff8e6;
+      --cream: #fffdf8;
+      --border: #d8d1c1;
+      --muted: #64748b;
+      --surface: #ffffff;
+      --sidebar-w: 240px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--cream);
+      color: var(--navy);
+      line-height: 1.55;
+    }
+
+    .layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    aside {
+      width: var(--sidebar-w);
+      flex-shrink: 0;
+      background: var(--navy);
+      color: #e8edf5;
+      padding: 1.5rem 0;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: visible;
+      transition: width 0.22s ease;
+    }
+
+    aside.collapsed {
+      width: 0;
+      padding: 0;
+      overflow: visible;
+    }
+
+    .sidebar-inner {
+      width: var(--sidebar-w);
+      height: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    aside.collapsed .sidebar-inner {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .sidebar-toggle {
+      position: absolute;
+      top: 1.35rem;
+      right: -13px;
+      z-index: 20;
+      width: 26px;
+      height: 36px;
+      padding: 0;
+      border: 1px solid var(--border);
+      border-left: none;
+      border-radius: 0 8px 8px 0;
+      background: var(--surface);
+      color: var(--navy);
+      font-size: 1.1rem;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 2px 0 8px rgba(21, 34, 56, 0.08);
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .sidebar-toggle:hover {
+      background: var(--gold-bg);
+      color: var(--gold);
+    }
+
+    aside.collapsed .sidebar-toggle {
+      right: auto;
+      left: 0;
+      border-left: 1px solid var(--border);
+      border-radius: 0 8px 8px 0;
+    }
+
+    .logo {
+      padding: 0 1.25rem 1.5rem;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      margin-bottom: 1rem;
+    }
+
+    .logo-mark {
+      width: 36px;
+      height: 36px;
+      border: 1px solid #d8c17a;
+      background: var(--gold-bg);
+      color: var(--gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      border-radius: 6px;
+      margin-bottom: 0.5rem;
+    }
+
+    .logo h1 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .logo p {
+      font-size: 0.7rem;
+      color: #94a3b8;
+      margin-top: 0.25rem;
+    }
+
+    nav button {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 0.6rem 1.25rem;
+      background: none;
+      border: none;
+      color: #cbd5e1;
+      font-size: 0.85rem;
+      cursor: pointer;
+      border-left: 3px solid transparent;
+    }
+
+    nav button:hover { background: rgba(255,255,255,0.06); color: #fff; }
+    nav button.active {
+      background: rgba(255,248,230,0.08);
+      color: #fff8e6;
+      border-left-color: #d8c17a;
+      font-weight: 600;
+    }
+
+    nav .group-label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #64748b;
+      padding: 1rem 1.25rem 0.35rem;
+    }
+
+    main {
+      flex: 1;
+      padding: 2rem 2.5rem 4rem;
+      max-width: 1100px;
+    }
+
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 0.35rem;
+      color: var(--navy);
+    }
+
+    .subtitle {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 1.75rem;
+    }
+
+    h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 2rem 0 0.75rem;
+      color: var(--navy);
+    }
+
+    p { margin-bottom: 0.75rem; font-size: 0.9rem; color: #334155; }
+
+    .diagram-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      overflow-x: auto;
+    }
+
+    .diagram-card h4 {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--gold);
+      margin-bottom: 1rem;
+    }
+
+    .mermaid { display: flex; justify-content: center; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      margin-bottom: 1.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    th {
+      background: var(--navy);
+      color: #fff;
+      text-align: left;
+      padding: 0.6rem 0.85rem;
+      font-weight: 600;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    td {
+      padding: 0.55rem 0.85rem;
+      border-top: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    tr:nth-child(even) td { background: #faf9f6; }
+
+    .pillars {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .pillar {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+    }
+
+    .pillar strong {
+      display: block;
+      font-size: 0.9rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .pillar span {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .status {
+      display: inline-block;
+      font-size: 0.68rem;
+      font-weight: 600;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      margin-top: 0.5rem;
+    }
+
+    .status.shipped { background: #dcfce7; color: #166534; }
+    .status.partial { background: var(--gold-bg); color: var(--gold); }
+    .status.pending { background: #f1f5f9; color: #475569; }
+
+    .journey {
+      list-style: none;
+      counter-reset: step;
+      margin-bottom: 1.5rem;
+    }
+
+    .journey li {
+      counter-increment: step;
+      padding: 0.65rem 0 0.65rem 2.5rem;
+      position: relative;
+      font-size: 0.88rem;
+      border-left: 2px solid var(--border);
+      margin-left: 0.75rem;
+    }
+
+    .journey li::before {
+      content: counter(step);
+      position: absolute;
+      left: -0.85rem;
+      top: 0.55rem;
+      width: 1.5rem;
+      height: 1.5rem;
+      background: var(--navy);
+      color: #fff;
+      border-radius: 50%;
+      font-size: 0.7rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .journey li:last-child { border-left-color: transparent; }
+
+    .callout {
+      background: var(--gold-bg);
+      border: 1px solid #e2d6b5;
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      font-size: 0.88rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .repo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .repo-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+    }
+
+    .repo-card h4 { font-size: 0.88rem; margin-bottom: 0.25rem; }
+    .repo-card .meta { font-size: 0.72rem; color: var(--muted); margin-bottom: 0.5rem; }
+    .repo-card p { font-size: 0.8rem; margin: 0; }
+
+    code {
+      font-family: ui-monospace, monospace;
+      font-size: 0.78rem;
+      background: #f1f5f9;
+      padding: 0.1rem 0.35rem;
+      border-radius: 3px;
+    }
+
+    .diagram-card.full-map {
+      min-width: 100%;
+      overflow-x: auto;
+    }
+
+    .mermaid-rendered svg {
+      max-width: 100%;
+      height: auto;
+    }
+
+    .diagram-card.full-map .mermaid-rendered svg {
+      max-width: none;
+      min-width: 1200px;
+    }
+
+    .mermaid-loading {
+      color: var(--muted);
+      font-size: 0.85rem;
+      padding: 1rem 0;
+    }
+
+    main.wide {
+      max-width: none;
+    }
+
+    .footer-note {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 2rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+
+    @media (max-width: 768px) {
+      .layout { flex-direction: column; }
+      aside { width: 100%; height: auto; position: relative; overflow: visible; }
+      aside.collapsed { width: 100%; }
+      aside.collapsed .sidebar-inner { opacity: 1; pointer-events: auto; }
+      .sidebar-toggle { display: none; }
+      main { padding: 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside id="sidebar">
+      <button type="button" class="sidebar-toggle" id="sidebar-toggle" aria-label="Collapse sidebar" title="Collapse sidebar">‹</button>
+      <div class="sidebar-inner">
+        <div class="logo">
+          <div class="logo-mark">L</div>
+          <h1>Architecture Viewer</h1>
+          <p>Updated 2026-06-23</p>
+        </div>
+        <nav id="nav">
+          <div class="group-label">System</div>
+          <button class="active" data-panel="systemmap">Full System Map</button>
+          <button data-panel="overview">Platform Overview</button>
+          <button data-panel="diagrams">Focused Diagrams</button>
+          <div class="group-label">Documents</div>
+          <button data-panel="product">Product Architecture</button>
+          <button data-panel="technical">Technical Architecture</button>
+          <div class="group-label">Source</div>
+          <button data-panel="gaps">Open Gaps</button>
+        </nav>
+      </div>
+    </aside>
+
+    <main class="wide">
+      <!-- FULL SYSTEM MAP -->
+      <section id="systemmap" class="panel active">
+        <h2>Full Platform System Map</h2>
+        <p class="subtitle">All repos, features, modules, and connections — updated 2026-06-23. Source: <code>platform-system-map.md</code></p>
+        <div class="callout">Scroll horizontally on large diagrams. Zoom browser if needed (Cmd/Ctrl +).</div>
+        <div class="diagram-card full-map">
+          <h4>Repos · Features · Data Flows</h4>
+          <p class="mermaid-loading" id="map-loading">Rendering diagram…</p>
+          <pre class="mermaid" id="full-system-map">graph TB
+    subgraph USERS [Users]
+        U1[BusinessOwner]
+        U2["CPA TaxPro"]
+        U3[PlatformAdmin]
+        U4[AnonymousVisitor]
+    end
+    subgraph FE [Front-End Layer]
+        subgraph WEB ["TT-website · Next.js 16 · port 3002"]
+            WEB_HOME[marketing homepage]
+            WEB_CHAT["pre-sales chat API"]
+            WEB_WAIT["waitlist Brevo API"]
+        end
+        subgraph TT ["taxpert-therapy · Next.js 14 · port 3003"]
+            TT_AUTH[Auth and Onboarding]
+            TT_PILLARS["Five Pillars pages"]
+            TT_DASH[Dashboard journey home]
+            TT_LOGOS_PAGE["Logos full page"]
+            TT_WIDGET[LogosWidget floating chat]
+            TT_STRAT["Strategy recommendations"]
+            TT_ENG["CPA Engagement API"]
+            TT_BFF["BFF proxy routes"]
+            subgraph LOGOS_LIB ["lib logos Document Parser"]
+                DOC_EXTRACT[documentExtractor]
+                CTX_ASSEM[contextAssembler]
+                LOGOS_CTX_SVC[logosContext service]
+            end
+        end
+        subgraph CPA_FE ["TT-cpa-platform · Next.js 16 · port 3001"]
+            CPA_DASH[Dashboard]
+            CPA_CRM[FirmClients CRM]
+            CPA_REQ[Request Queue]
+            CPA_RET[Returns Kanban]
+            CPA_MKT[Marketplace]
+            CPA_CORE["tt-core proxy"]
+        end
+    end
+    subgraph BE [Back-End Layer]
+        subgraph CORE ["TT-api-core · NestJS · port 8085"]
+            CORE_AUTH[auth]
+            CORE_LOGOS[logos RIE ROI]
+            CORE_TAXADV["tax-advisor IRC sessions"]
+            CORE_AI["ai and llm"]
+            CORE_STRIPE[billing]
+            CORE_PLAID[plaid]
+            CORE_QBO[qbo]
+            CORE_HANDOFF[handoffs]
+            subgraph STRAT_ENG [Strategy engine]
+                SE_ALL["11 strategy calculators"]
+                CROSS_INTEL[Cross-Intelligence]
+            end
+        end
+        subgraph QBO_SVC [qbo-service]
+            QBO_SYNC[QBOSyncService]
+        end
+    end
+    subgraph AI [AI Agentic Layer]
+        subgraph COPILOT ["TT-dev-copilot ADK"]
+            AGENT["root and dev copilot agents"]
+            LOGOS_ADV[logos-tax-advisor]
+            CODEBASE_RAG[Codebase RAG Index]
+            IRC_RAG[IRC Tax Law RAG Index]
+            LOGOS_CTX[logos_context_tools]
+            STRAT_TOOLS[strategy_engine_tools]
+        end
+        MCP_TOOLS["TT-mcp-server dev only"]
+    end
+    subgraph INFRA [Infrastructure]
+        SUPA[(Supabase)]
+        REDIS[(Redis)]
+        STRIPE_EXT[Stripe]
+        PLAID_EXT[Plaid]
+        QBO_EXT[QuickBooks]
+        VERTEX[Vertex AI Vector Search]
+        ANTHROPIC[Anthropic]
+        OPENAI[OpenAI]
+    end
+    U4 --> WEB_HOME
+    U4 --> WEB_CHAT
+    U1 --> TT_DASH
+    U1 --> TT_PILLARS
+    U1 --> TT_WIDGET
+    U2 --> CPA_DASH
+    WEB_CHAT --> CORE_TAXADV
+    TT_BFF --> DOC_EXTRACT
+    DOC_EXTRACT --> CTX_ASSEM
+    CTX_ASSEM --> LOGOS_CTX_SVC
+    LOGOS_CTX_SVC --> SUPA
+    TT_BFF --> CORE_TAXADV
+    CORE_TAXADV --> REDIS
+    CORE_TAXADV --> IRC_RAG
+    TT_DASH --> CORE_LOGOS
+    TT_LOGOS_PAGE --> CORE_LOGOS
+    TT_ENG --> SUPA
+    CPA_CORE --> CORE_AUTH
+    CPA_CORE --> CORE_HANDOFF
+    CPA_FE --> QBO_SVC
+    CORE_LOGOS --> CORE_AI
+    CORE_LOGOS --> SE_ALL
+    SE_ALL --> CROSS_INTEL
+    CORE_AI --> ANTHROPIC
+    CORE_AI --> OPENAI
+    CORE_STRIPE --> STRIPE_EXT
+    CORE_PLAID --> PLAID_EXT
+    CORE_QBO --> QBO_EXT
+    CORE_AUTH --> REDIS
+    CORE_LOGOS --> SUPA
+    AGENT --> CODEBASE_RAG
+    AGENT --> IRC_RAG
+    LOGOS_ADV --> IRC_RAG
+    STRAT_TOOLS --> CORE_LOGOS
+    MCP_TOOLS -.-> CORE
+    MCP_TOOLS -.-> AGENT
+          </pre>
+        </div>
+      </section>
+
+      <!-- OVERVIEW -->
+      <section id="overview" class="panel">
+        <h2>Logos Tax Systems</h2>
+        <p class="subtitle">Portable tax operating system — AI-powered, CPA-executed, business-owner-owned.</p>
+
+        <div class="callout">
+          <strong>Value-delivery moment:</strong> Enchiridion converts Logos analysis into a portable strategy playbook the owner takes to a CPA.
+        </div>
+
+        <h3>Five Product Pillars</h3>
+        <div class="pillars">
+          <div class="pillar"><strong>Citadel</strong><span>/citadel</span><span class="status partial">UI shipped</span></div>
+          <div class="pillar"><strong>Logos</strong><span>Widget + /logos</span><span class="status shipped">Shipped</span></div>
+          <div class="pillar"><strong>Enchiridion</strong><span>/enchiridion</span><span class="status partial">UI shipped</span></div>
+          <div class="pillar"><strong>Ledger</strong><span>/ledger</span><span class="status partial">Partial</span></div>
+          <div class="pillar"><strong>Vault</strong><span>/vault</span><span class="status shipped">Shipped</span></div>
+        </div>
+
+        <h3>Three Surfaces</h3>
+        <table>
+          <thead><tr><th>Surface</th><th>Domain</th><th>Repo</th><th>Port</th></tr></thead>
+          <tbody>
+            <tr><td>Marketing</td><td>logostaxsystems.com</td><td>TT-website</td><td>3002</td></tr>
+            <tr><td>Business owner app</td><td>app.logostaxsystems.com</td><td>taxpert-therapy</td><td>3003</td></tr>
+            <tr><td>CPA portal</td><td>cpa.logostaxsystems.com</td><td>TT-cpa-platform</td><td>3001</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Repos</h3>
+        <div class="repo-grid">
+          <div class="repo-card"><h4>TT-website</h4><div class="meta">Next.js 16 · Marketing</div><p>Public site, waitlist, pre-sales chat</p></div>
+          <div class="repo-card"><h4>taxpert-therapy</h4><div class="meta">Next.js 14 · BO app</div><p>Five pillars, Logos widget, engagement</p></div>
+          <div class="repo-card"><h4>TT-cpa-platform</h4><div class="meta">Next.js 16 · CPA portal</div><p>CRM, kanban, marketplace, earnings</p></div>
+          <div class="repo-card"><h4>TT-api-core</h4><div class="meta">NestJS · Cloud Run</div><p>Auth, logos, billing, integrations</p></div>
+          <div class="repo-card"><h4>TT-dev-copilot</h4><div class="meta">ADK + FastAPI</div><p>Logos agent, IRC RAG, dev copilot</p></div>
+          <div class="repo-card"><h4>TT-mcp-server</h4><div class="meta">MCP · Dev only</div><p>Cursor IDE bridge to platform APIs</p></div>
+        </div>
+
+        <div class="diagram-card">
+          <h4>Product Value Chain</h4>
+          <pre class="mermaid">
+flowchart LR
+    Citadel --> Logos
+    Vault --> Logos
+    Logos --> Enchiridion
+    Enchiridion --> Marketplace
+    Marketplace --> CPAPlatform
+    CPAPlatform --> Ledger
+    Ledger -->|"portable forever"| BO[BusinessOwner]
+          </pre>
+        </div>
+      </section>
+
+      <!-- ALL DIAGRAMS -->
+      <section id="diagrams" class="panel">
+        <h2>All Architecture Diagrams</h2>
+        <p class="subtitle">Four Mermaid diagrams from product-architecture.md and technical-architecture.md</p>
+
+        <div class="diagram-card">
+          <h4>1 — Product Value Chain</h4>
+          <pre class="mermaid">
+flowchart LR
+    Citadel --> Logos
+    Vault --> Logos
+    Logos --> Enchiridion
+    Enchiridion --> Marketplace
+    Marketplace --> CPAPlatform
+    CPAPlatform --> Ledger
+    Ledger -->|"portable forever"| BO[BusinessOwner]
+          </pre>
+        </div>
+
+        <div class="diagram-card">
+          <h4>2 — Deployment Topology</h4>
+          <pre class="mermaid">
+graph TB
+    subgraph users [Users]
+        U1[BusinessOwner]
+        U2[CPA]
+        U3[AnonymousVisitor]
+    end
+    subgraph fe [Front-End Layer]
+        WEB[TT-website\nNext.js 16\nlogostaxsystems.com :3002]
+        APP[taxpert-therapy\nNext.js 14\napp.logostaxsystems.com :3003]
+        CPA_FE[TT-cpa-platform\nNext.js 16\ncpa.logostaxsystems.com :3001]
+    end
+    subgraph be [Back-End Layer]
+        CORE[TT-api-core\nNestJS\nCloud Run :8085]
+        QBO[qbo-service\nNode.js]
+    end
+    subgraph ai [AI Layer]
+        COPILOT[TT-dev-copilot\nGoogle ADK]
+        MCP[TT-mcp-server\ndev tooling]
+    end
+    subgraph data [Data and Integrations]
+        SUPA[(Supabase PostgreSQL)]
+        REDIS[(Redis)]
+        STRIPE[Stripe]
+        PLAID[Plaid]
+        QBOAPI[QuickBooks Online]
+        VERTEX[Vertex AI Vector Search]
+    end
+    U3 --> WEB
+    U1 --> APP
+    U2 --> CPA_FE
+    APP --> CORE
+    CPA_FE --> CORE
+    CPA_FE --> QBO
+    CORE --> SUPA
+    CORE --> REDIS
+    CORE --> COPILOT
+    COPILOT --> VERTEX
+    MCP -.-> CORE
+    MCP -.-> COPILOT
+          </pre>
+        </div>
+
+        <div class="diagram-card">
+          <h4>3 — taxpert-therapy Route Map</h4>
+          <pre class="mermaid">
+graph TB
+    subgraph pillars [Five Pillars]
+        P1["/citadel"]
+        P2["/ledger"]
+        P3["/enchiridion"]
+        P4["/vault"]
+    end
+    subgraph logos [Logos Surfaces]
+        W[LogosWidget]
+        LP["/logos"]
+        LH["/logos/history"]
+    end
+    subgraph dash [Dashboard]
+        D["/dashboard"]
+        MC["/dashboard/my-cpas"]
+    end
+    subgraph other [Other Routes]
+        STR["/strategies"]
+        ONB["/onboarding"]
+        ENG["/api/engagement"]
+    end
+    subgraph bff [BFF APIs]
+        TA["/api/tax-advisor"]
+        LG["/api/logos"]
+        V1["/api/v1"]
+    end
+    APP_NODE[taxpert-therapy] --> pillars
+    APP_NODE --> logos
+    APP_NODE --> dash
+    APP_NODE --> other
+    APP_NODE --> bff
+    bff --> CORE_NODE[TT-api-core]
+          </pre>
+        </div>
+
+        <div class="diagram-card">
+          <h4>4 — AI and RAG Layer</h4>
+          <pre class="mermaid">
+graph TB
+    subgraph clients [Callers]
+        APP_FE[taxpert-therapy BFF]
+        WEB_FE[TT-website]
+        CORE_TA[tax-advisor module]
+        CORE_LOGOS[logos module]
+    end
+    subgraph copilot [TT-dev-copilot]
+        ROOT[root_agent\ngemini-2.5-flash]
+        DEV[tt_dev_copilot\ngemini-1.5-flash]
+        LOGOS_ADV[logos-tax-advisor]
+    end
+    subgraph rag [RAG Indexes]
+        CB[Codebase Index]
+        IRC[IRC Tax Law Index]
+    end
+    subgraph engine [Strategy Engine]
+        SE[logos/strategies]
+        CI[Cross-Intelligence]
+    end
+    APP_FE --> CORE_TA
+    APP_FE --> CORE_LOGOS
+    WEB_FE --> CORE_TA
+    CORE_TA --> IRC
+    CORE_LOGOS --> ROOT
+    CORE_LOGOS --> SE
+    SE --> CI
+    ROOT --> CB
+    ROOT --> IRC
+    LOGOS_ADV --> IRC
+          </pre>
+        </div>
+      </section>
+
+      <!-- PRODUCT -->
+      <section id="product" class="panel">
+        <h2>Product Architecture</h2>
+        <p class="subtitle">Pillars, UX rules, user journeys, engagement MVP</p>
+
+        <h3>End-to-End User Journey</h3>
+        <ol class="journey">
+          <li><strong>Sign up + Onboarding</strong> — 3-step flow with seed insight</li>
+          <li><strong>Citadel</strong> — Connect Plaid, QBO, payroll</li>
+          <li><strong>Vault</strong> — Upload tax documents</li>
+          <li><strong>Logos</strong> — AI chat surfaces tax position</li>
+          <li><strong>Enchiridion</strong> — Strategy playbook with savings</li>
+          <li><strong>CPA Marketplace</strong> — Engagement request with context</li>
+          <li><strong>CPA implements</strong> — Strategies filed, Ledger updated</li>
+          <li><strong>Ledger</strong> — Portable history across CPAs</li>
+        </ol>
+
+        <h3>AppHeader Navigation</h3>
+        <table>
+          <thead><tr><th>Link</th><th>Route</th></tr></thead>
+          <tbody>
+            <tr><td>Dashboard</td><td><code>/dashboard</code></td></tr>
+            <tr><td>Citadel</td><td><code>/citadel</code></td></tr>
+            <tr><td>Ledger</td><td><code>/ledger</code></td></tr>
+            <tr><td>Enchiridion</td><td><code>/enchiridion</code></td></tr>
+            <tr><td>Vault</td><td><code>/vault</code></td></tr>
+            <tr><td>Advisors</td><td><code>/dashboard/my-cpas</code></td></tr>
+          </tbody>
+        </table>
+
+        <h3>LogosWidget Rules</h3>
+        <p>Mounted in <code>app/layout.tsx</code>. Hidden on:</p>
+        <table>
+          <thead><tr><th>Excluded path</th><th>Reason</th></tr></thead>
+          <tbody>
+            <tr><td><code>/strategies</code></td><td>Strategy agent has dedicated surface</td></tr>
+            <tr><td><code>/logos</code></td><td>Full Logos page already open</td></tr>
+            <tr><td><code>/onboarding</code></td><td>Onboarding should not compete with chat</td></tr>
+          </tbody>
+        </table>
+
+        <h3>AI Agents (Product View)</h3>
+        <table>
+          <thead><tr><th>Agent</th><th>Role</th><th>Where</th></tr></thead>
+          <tbody>
+            <tr><td>Logos</td><td>Conversational tax advisor</td><td>Widget + /logos</td></tr>
+            <tr><td>Strategy agent</td><td>Recommendation engine</td><td>/strategies only</td></tr>
+            <tr><td>IRC Tax Advisor</td><td>Anonymous pre-sales Q&A</td><td>TT-website</td></tr>
+            <tr><td>logos-tax-advisor</td><td>GCP ADK agent</td><td>TT-dev-copilot</td></tr>
+          </tbody>
+        </table>
+
+        <h3>CPA Engagement (MVP)</h3>
+        <table>
+          <thead><tr><th>Surface</th><th>Implementation</th></tr></thead>
+          <tbody>
+            <tr><td>BO engagement list</td><td><code>/dashboard/my-cpas</code></td></tr>
+            <tr><td>List engagements</td><td><code>GET /api/engagement/requests</code></td></tr>
+            <tr><td>End engagement</td><td><code>POST /api/engagement/end</code></td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- TECHNICAL -->
+      <section id="technical" class="panel">
+        <h2>Technical Architecture</h2>
+        <p class="subtitle">Repos, APIs, AI layer, infrastructure</p>
+
+        <h3>Live URLs</h3>
+        <table>
+          <thead><tr><th>Service</th><th>URL</th></tr></thead>
+          <tbody>
+            <tr><td>TT-api-core</td><td><code>https://tt-api-core-j2wqib4fcq-uk.a.run.app</code></td></tr>
+            <tr><td>TT-dev-copilot</td><td><code>https://tt-dev-copilot-316598874164.us-central1.run.app</code></td></tr>
+            <tr><td>Supabase</td><td><code>yhrbwyarzrjwgkthojzu</code></td></tr>
+            <tr><td>GCP project</td><td><code>taxpert-therapy-agent-builder</code></td></tr>
+          </tbody>
+        </table>
+
+        <h3>TT-api-core Modules</h3>
+        <table>
+          <thead><tr><th>Module</th><th>Function</th></tr></thead>
+          <tbody>
+            <tr><td>auth</td><td>JWT, token blacklist, Supabase sync</td></tr>
+            <tr><td>orgs</td><td>Multi-tenant provisioning</td></tr>
+            <tr><td>logos</td><td>AI conversation, RIE, strategy-map</td></tr>
+            <tr><td>tax-advisor</td><td>Public IRC widget, anon Redis sessions</td></tr>
+            <tr><td>ai / llm</td><td>LLM utilities + provider abstraction</td></tr>
+            <tr><td>billing</td><td>Stripe subscriptions</td></tr>
+            <tr><td>plaid / qbo</td><td>Bank + QuickBooks integrations</td></tr>
+            <tr><td>event-bridge</td><td>Webhooks, HMAC, Redis pub/sub</td></tr>
+            <tr><td>handoffs</td><td>AI to CPA escalation</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Agent Models</h3>
+        <table>
+          <thead><tr><th>Agent</th><th>Model</th><th>Tools</th></tr></thead>
+          <tbody>
+            <tr><td>root_agent</td><td>gemini-2.5-flash</td><td>Logos context, codebase RAG</td></tr>
+            <tr><td>tt_dev_copilot</td><td>gemini-1.5-flash</td><td>PR read, tests, DB inspect</td></tr>
+            <tr><td>logos-tax-advisor</td><td>ADK deploy</td><td>IRC RAG, strategy tools</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Technical Debt</h3>
+        <table>
+          <thead><tr><th>Item</th><th>Impact</th></tr></thead>
+          <tbody>
+            <tr><td>Prisma filename on LogosSession</td><td>/logos session history broken</td></tr>
+            <tr><td>TT-api-core PR #9 conflict</td><td>Blocks PRs #10-12</td></tr>
+            <tr><td>RLS on cpa_clients</td><td>Engagement visibility gaps</td></tr>
+            <tr><td>Redis not in prod</td><td>Graceful degrade locally</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- GAPS -->
+      <section id="gaps" class="panel">
+        <h2>Open Product Gaps</h2>
+        <p class="subtitle">Status as of 2026-06-23</p>
+        <table>
+          <thead><tr><th>Gap</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>CPA data bridge to TT-cpa-platform</td><td><span class="status partial">Partial</span></td></tr>
+            <tr><td>Engagement letter flow</td><td><span class="status pending">Not built</span></td></tr>
+            <tr><td>Enchiridion to marketplace CTA</td><td><span class="status pending">Not built</span></td></tr>
+            <tr><td>Ledger CPA implementation events</td><td><span class="status partial">Partial</span></td></tr>
+            <tr><td>Enchiridion real Supabase profile data</td><td><span class="status pending">Pending</span></td></tr>
+            <tr><td>Citadel inline Plaid connect</td><td><span class="status pending">Pending</span></td></tr>
+            <tr><td>IRS forms 2848/8821</td><td><span class="status pending">Out of scope MVP</span></td></tr>
+          </tbody>
+        </table>
+
+        <p class="footer-note">
+          Source markdown: <code>architecture/product-architecture.md</code> and <code>architecture/technical-architecture.md</code>.
+          Open this file in any browser — diagrams render via Mermaid CDN (requires network on first load).
+        </p>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    const rendered = new Set();
+
+    function showMermaidLoadError() {
+      const banner = document.createElement("div");
+      banner.style.cssText = "background:#fef2f2;color:#991b1b;padding:12px 16px;margin:16px;border:1px solid #fecaca;border-radius:8px;font-size:14px;";
+      banner.textContent = "Mermaid failed to load. Check your network connection and reload the page.";
+      document.querySelector("main")?.prepend(banner);
+    }
+
+    async function renderPanelMermaid(panelId) {
+      if (rendered.has(panelId)) return;
+      const panel = document.getElementById(panelId);
+      if (!panel) return;
+
+      const blocks = panel.querySelectorAll("pre.mermaid");
+      for (let i = 0; i < blocks.length; i++) {
+        const block = blocks[i];
+        if (block.dataset.rendered === "true") continue;
+        const code = block.textContent.trim();
+        const id = "mmd-" + panelId + "-" + i;
+        try {
+          const { svg, bindFunctions } = await mermaid.render(id, code);
+          const wrapper = document.createElement("div");
+          wrapper.className = "mermaid-rendered";
+          wrapper.innerHTML = svg;
+          if (typeof bindFunctions === "function") bindFunctions(wrapper);
+          block.replaceWith(wrapper);
+        } catch (e) {
+          const err = document.createElement("pre");
+          err.style.cssText = "color:#b91c1c;font-size:0.85rem;white-space:pre-wrap;padding:12px;background:#fef2f2;border-radius:6px;";
+          err.textContent = "Diagram render error:\n" + e.message;
+          block.replaceWith(err);
+        }
+      }
+      rendered.add(panelId);
+      document.getElementById("map-loading")?.remove();
+    }
+
+    async function initViewer() {
+      if (typeof mermaid === "undefined") {
+        showMermaidLoadError();
+        return;
+      }
+
+      const sidebar = document.getElementById("sidebar");
+      const sidebarToggle = document.getElementById("sidebar-toggle");
+      const SIDEBAR_KEY = "arch-viewer-sidebar-collapsed";
+
+      function setSidebarCollapsed(collapsed) {
+        sidebar?.classList.toggle("collapsed", collapsed);
+        if (sidebarToggle) {
+          sidebarToggle.textContent = collapsed ? "›" : "‹";
+          sidebarToggle.setAttribute("aria-label", collapsed ? "Expand sidebar" : "Collapse sidebar");
+          sidebarToggle.title = collapsed ? "Expand sidebar" : "Collapse sidebar";
+        }
+        try {
+          localStorage.setItem(SIDEBAR_KEY, collapsed ? "1" : "0");
+        } catch (_) {}
+      }
+
+      sidebarToggle?.addEventListener("click", () => {
+        setSidebarCollapsed(!sidebar?.classList.contains("collapsed"));
+      });
+
+      try {
+        if (localStorage.getItem(SIDEBAR_KEY) === "1") {
+          setSidebarCollapsed(true);
+        }
+      } catch (_) {}
+
+      mermaid.initialize({
+        startOnLoad: false,
+        securityLevel: "loose",
+        theme: "base",
+        themeVariables: {
+          primaryColor: "#fff8e6",
+          primaryTextColor: "#152238",
+          primaryBorderColor: "#8a6a16",
+          lineColor: "#64748b",
+          secondaryColor: "#f8fafc",
+          tertiaryColor: "#fffdf8",
+          fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+          fontSize: "13px"
+        },
+        flowchart: { curve: "basis", padding: 16, htmlLabels: true }
+      });
+
+      const panels = document.querySelectorAll(".panel");
+      const buttons = document.querySelectorAll("#nav button");
+
+      buttons.forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const id = btn.dataset.panel;
+          buttons.forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          panels.forEach((p) => p.classList.remove("active"));
+          document.getElementById(id)?.classList.add("active");
+          await renderPanelMermaid(id);
+        });
+      });
+
+      await renderPanelMermaid("systemmap");
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", initViewer);
+    } else {
+      initViewer();
+    }
+  </script>
+</body>
+</html>
