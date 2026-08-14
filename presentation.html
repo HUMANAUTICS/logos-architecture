@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Logos Tax Systems — Investor Pitch Deck</title>
+  <!-- Google Fonts: Playfair Display for headings, Inter for body -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  
+  <style>
+    /* CORE BRAND PALETTE */
+    :root {
+      --bg-dark: #121824;
+      --bg-panel: #1C2840;
+      --brand-gold: #B5A462;
+      --brand-cream: #F5F3EF;
+      --text-main: #F5F3EF;
+      --text-muted: #9CA3AF;
+      --accent-red: #EF4444;
+      --accent-green: #10B981;
+      --border-color: #2D3A54;
+      --font-serif: 'Playfair Display', Georgia, serif;
+      --font-sans: 'Inter', system-ui, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* PRESENTATION CONTAINER */
+    .deck-container {
+      position: relative;
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    /* TOP PROGRESS BAR */
+    .progress-bar-container {
+      width: 100%;
+      height: 6px;
+      background-color: rgba(255, 255, 255, 0.05);
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 10;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background-color: var(--brand-gold);
+      transition: width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    /* SLIDE STACKS */
+    .slides-wrapper {
+      position: relative;
+      flex: 1;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      padding: 60px 80px 100px 80px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(50px);
+      transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    .slide.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateX(0);
+    }
+
+    .slide.previous {
+      transform: translateX(-50px);
+    }
+
+    /* TYPOGRAPHY */
+    h1, h2, h3 {
+      font-family: var(--font-serif);
+      font-weight: 600;
+    }
+
+    .slide-title {
+      font-size: 3rem;
+      margin-bottom: 10px;
+      color: var(--brand-cream);
+    }
+
+    .slide-subtitle {
+      font-size: 1.25rem;
+      color: var(--brand-gold);
+      margin-bottom: 40px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-weight: 500;
+    }
+
+    p {
+      font-size: 1.15rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+    }
+
+    /* GRID LAYOUTS */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 50px;
+      align-items: center;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 30px;
+    }
+
+    .grid-5 {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 15px;
+    }
+
+    /* CARD STYLES */
+    .card {
+      background-color: var(--bg-panel);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 30px;
+      transition: border-color 0.3s ease, transform 0.3s ease;
+    }
+
+    .card:hover {
+      border-color: var(--brand-gold);
+      transform: translateY(-5px);
+    }
+
+    .card h3 {
+      font-size: 1.5rem;
+      color: var(--brand-gold);
+      margin-bottom: 15px;
+    }
+
+    .card p {
+      font-size: 1rem;
+    }
+
+    .card-metric {
+      font-size: 3.5rem;
+      font-weight: 700;
+      color: var(--brand-gold);
+      margin-bottom: 10px;
+      font-family: var(--font-serif);
+    }
+
+    /* DYNAMIC PROBLEM/SOLUTION FLOWS */
+    .problem-box {
+      border-left: 4px solid var(--accent-red);
+      background-color: rgba(239, 68, 68, 0.05);
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .solution-box {
+      border-left: 4px solid var(--accent-green);
+      background-color: rgba(16, 185, 129, 0.05);
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .flow-step {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      background: var(--bg-panel);
+      padding: 15px 20px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      margin-bottom: 12px;
+    }
+
+    .flow-num {
+      background: var(--brand-gold);
+      color: var(--bg-dark);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    /* COMPLIANCE FUSION PIPELINE GRAPHIC */
+    .fusion-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      padding: 20px 0;
+    }
+
+    .fusion-node {
+      background-color: var(--bg-panel);
+      border: 1px solid var(--border-color);
+      padding: 15px 20px;
+      border-radius: 8px;
+      width: 180px;
+      text-align: center;
+      z-index: 2;
+    }
+
+    .fusion-center {
+      background: linear-gradient(135deg, var(--bg-panel) 0%, #2A3C5C 100%);
+      border: 2px solid var(--brand-gold);
+      padding: 25px;
+      border-radius: 50%;
+      width: 150px;
+      height: 150px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      box-shadow: 0 0 20px rgba(181, 164, 98, 0.15);
+      z-index: 2;
+    }
+
+    .fusion-arrow {
+      height: 2px;
+      background: var(--border-color);
+      flex: 1;
+      position: relative;
+    }
+
+    .fusion-arrow::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: -4px;
+      width: 0;
+      height: 0;
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+      border-left: 8px solid var(--border-color);
+    }
+
+    /* PRICING GRID */
+    .pricing-table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: var(--bg-panel);
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+    }
+
+    .pricing-table th, .pricing-table td {
+      padding: 15px 25px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .pricing-table th {
+      background-color: rgba(255, 255, 255, 0.02);
+      color: var(--brand-gold);
+      font-weight: 600;
+    }
+
+    .pricing-highlight {
+      background-color: rgba(181, 164, 98, 0.08);
+      font-weight: 600;
+    }
+
+    /* CONTROLS FOOTER */
+    .deck-controls {
+      background-color: rgba(18, 24, 36, 0.95);
+      border-top: 1px solid var(--border-color);
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      z-index: 10;
+    }
+
+    .slide-counter {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      letter-spacing: 1px;
+    }
+
+    .nav-buttons {
+      display: flex;
+      gap: 15px;
+    }
+
+    .nav-btn {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+    }
+
+    .nav-btn:hover {
+      border-color: var(--brand-gold);
+      color: var(--brand-gold);
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+      border-color: var(--border-color);
+      color: var(--text-muted);
+    }
+
+    /* SPEAKER NOTES DRAWER */
+    .notes-toggle {
+      background: rgba(181, 164, 98, 0.1);
+      border: 1px solid var(--brand-gold);
+      color: var(--brand-gold);
+    }
+
+    .notes-toggle:hover {
+      background: var(--brand-gold);
+      color: var(--bg-dark);
+    }
+
+    .notes-drawer {
+      position: absolute;
+      bottom: 60px;
+      left: 0;
+      width: 100%;
+      height: 180px;
+      background-color: #0E131F;
+      border-top: 2px solid var(--brand-gold);
+      padding: 25px 40px;
+      transform: translateY(100%);
+      transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+      z-index: 9;
+      overflow-y: auto;
+    }
+
+    .notes-drawer.open {
+      transform: translateY(0);
+    }
+
+    .notes-title {
+      font-family: var(--font-serif);
+      font-size: 1.1rem;
+      color: var(--brand-gold);
+      margin-bottom: 8px;
+    }
+
+    .notes-content {
+      font-size: 1rem;
+      line-height: 1.6;
+      color: var(--brand-cream);
+    }
+
+    /* VISUAL ACCENTS */
+    .highlight-gold {
+      color: var(--brand-gold);
+    }
+
+    .founder-image-placeholder {
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      border: 2px solid var(--brand-gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      background-color: var(--bg-panel);
+    }
+
+    .founder-story-quote {
+      font-family: var(--font-serif);
+      font-size: 1.4rem;
+      font-style: italic;
+      line-height: 1.6;
+      color: var(--brand-cream);
+      border-left: 3px solid var(--brand-gold);
+      padding-left: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="deck-container">
+    
+    <!-- TOP PROGRESS BAR -->
+    <div class="progress-bar-container">
+      <div class="progress-bar-fill" id="progressBar"></div>
+    </div>
+
+    <!-- SLIDES WRAPPER -->
+    <div class="slides-wrapper">
+
+      <!-- SLIDE 1: COVER -->
+      <div class="slide active" data-slide="1">
+        <div style="text-align: center; max-width: 900px; margin: 0 auto;">
+          <div style="font-size: 1.5rem; letter-spacing: 6px; text-transform: uppercase; color: var(--brand-gold); margin-bottom: 20px;">
+            Logos Tax Systems
+          </div>
+          <h1 style="font-size: 4.5rem; line-height: 1.1; margin-bottom: 25px;">
+            The Portable Tax Operating System
+          </h1>
+          <p style="font-size: 1.5rem; color: var(--brand-cream); font-weight: 300; margin-bottom: 50px;">
+            Powered by AI. Executed by CPAs. Owned by the business owner forever.
+          </p>
+          <div style="display: inline-block; border: 1px solid var(--brand-gold); padding: 10px 24px; border-radius: 50px; color: var(--brand-gold); font-size: 0.9rem; letter-spacing: 1px; text-transform: uppercase;">
+            Pre-Beta Platform Demo Live
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 2: THE PROBLEM -->
+      <div class="slide" data-slide="2">
+        <span class="slide-subtitle">The Core Problem</span>
+        <h2 class="slide-title">Scattered Data & The Black Box Trap</h2>
+        <div class="grid-2" style="margin-top: 20px;">
+          <div>
+            <div class="problem-box">
+              <h3 style="color: var(--accent-red); margin-bottom: 10px; font-family: var(--font-sans); font-size: 1.2rem; font-weight: 600;">
+                Data Monopolization
+              </h3>
+              <p>Your entire strategic tax planning, documentation history, and compliance files live inside your CPA's proprietary internal systems. You cannot access it or own it.</p>
+            </div>
+            <div class="problem-box">
+              <h3 style="color: var(--accent-red); margin-bottom: 10px; font-family: var(--font-sans); font-size: 1.2rem; font-weight: 600;">
+                The "Zero-Start" Trap
+              </h3>
+              <p>When you switch accountants, you start from scratch. The new CPA has no historical context, leading to double onboarding charges, duplicate audits, and missed deductions.</p>
+            </div>
+          </div>
+          <div>
+            <p style="font-size: 1.3rem; line-height: 1.6; margin-bottom: 20px;">
+              "Traditional accounting relationships rely on keeping business owners in the dark. By locking context in proprietary client management systems, switching CPAs becomes a painful process."
+            </p>
+            <div style="height: 1px; background-color: var(--border-color); margin: 25px 0;"></div>
+            <p style="color: var(--brand-gold); font-weight: 600; font-size: 1.1rem;">
+              The average high-growth startup switches accountants every 2.4 years due to poor service or high fees—paying thousands to start over.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 3: THE SOLUTION -->
+      <div class="slide" data-slide="3">
+        <span class="slide-subtitle">The Logos Solution</span>
+        <h2 class="slide-title">Flipping the Power Dynamics of Tax Data</h2>
+        <div class="grid-2">
+          <div>
+            <p style="font-size: 1.3rem; margin-bottom: 30px;">
+              We have built the first **portable database** for corporate tax. The business owner retains full custody of their financial records, AI advisory logs, and strategy implementation steps.
+            </p>
+            <div class="solution-box">
+              <h3 style="color: var(--accent-green); margin-bottom: 8px; font-family: var(--font-sans); font-size: 1.2rem; font-weight: 600;">
+                Permanent Sovereignty
+              </h3>
+              <p>Your tax details belong to you. When you switch CPAs, you simply revoke their database credentials and hand the same dashboard and historical pipeline to your next CPA.</p>
+            </div>
+          </div>
+          <div>
+            <div class="flow-step">
+              <div class="flow-num">1</div>
+              <div>
+                <strong style="color: var(--brand-cream);">Logos Syncs Data</strong>
+                <p style="font-size: 0.95rem;">Citadel ingests QBO, bank cards, payroll and IRS data.</p>
+              </div>
+            </div>
+            <div class="flow-step">
+              <div class="flow-num">2</div>
+              <div>
+                <strong style="color: var(--brand-cream);">AI Proposes & CPA Implements</strong>
+                <p style="font-size: 0.95rem;">Actionable strategies are verified by a marketplace CPA.</p>
+              </div>
+            </div>
+            <div class="flow-step">
+              <div class="flow-num">3</div>
+              <div>
+                <strong style="color: var(--brand-cream);">Ledger Records & Persists</strong>
+                <p style="font-size: 0.95rem;">The proof of execution stays in your own portal forever.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 4: PRODUCT CORE -->
+      <div class="slide" data-slide="4">
+        <span class="slide-subtitle">Product Architecture</span>
+        <h2 class="slide-title">The Five Pillars of Logos Tax Systems</h2>
+        <div class="grid-5" style="margin-top: 20px;">
+          <div class="card">
+            <h3>Citadel</h3>
+            <p>Integrations engine connecting Plaid, QBO, Payroll, and direct IRS transcripts to ingest active financial records.</p>
+          </div>
+          <div class="card">
+            <h3>Logos</h3>
+            <p>Conversational AI tax strategist analyzing documents and live feeds for deduction signals 24/7.</p>
+          </div>
+          <div class="card">
+            <h3>Enchiridion</h3>
+            <p>The playbook: Synthesizes your profile into dollar-savings estimates, step-by-step guidance, and tax code references.</p>
+          </div>
+          <div class="card">
+            <h3>Ledger</h3>
+            <p>Permanent timeline showing business operations and CPA-signed filing events, ready for audits.</p>
+          </div>
+          <div class="card">
+            <h3>Vault</h3>
+            <p>Secure, end-to-end encrypted storage of tax returns, incorporation filings, and AI chat sessions.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 5: SECRET SAUCE -->
+      <div class="slide" data-slide="5">
+        <span class="slide-subtitle">Technology & Moat</span>
+        <h2 class="slide-title">The Multi-Platform Orchestration Engine</h2>
+        <div class="grid-2">
+          <div>
+            <p style="margin-bottom: 25px; font-size: 1.2rem;">
+              Our proprietary compliance queue automatically orchestrates live client files across four security dimensions:
+            </p>
+            <ul style="list-style: none; margin-bottom: 25px;">
+              <li style="margin-bottom: 12px; display: flex; gap: 10px; align-items: flex-start;">
+                <span style="color: var(--brand-gold);">✓</span>
+                <span><strong>IRS Direct Access:</strong> Pulls official tax transcript records and matches notices in real-time.</span>
+              </li>
+              <li style="margin-bottom: 12px; display: flex; gap: 10px; align-items: flex-start;">
+                <span style="color: var(--brand-gold);">✓</span>
+                <span><strong>Legal Precedent RAG:</strong> Over 10,000 cases indexed to provide defensible court citations for every tax savings deduction.</span>
+              </li>
+              <li style="margin-bottom: 12px; display: flex; gap: 10px; align-items: flex-start;">
+                <span style="color: var(--brand-gold);">✓</span>
+                <span><strong>Transaction Risk Scoring:</strong> Automatically flags meals, home office deductions, and cash events to maintain IRS safety compliance.</span>
+              </li>
+            </ul>
+          </div>
+          
+          <div>
+            <!-- Visual Pipeline Diagram -->
+            <div class="fusion-container">
+              <div style="display: flex; flex-direction: column; gap: 20px;">
+                <div class="fusion-node">IRS Transcript API</div>
+                <div class="fusion-node">QBO Financials</div>
+                <div class="fusion-node">Bank Transactions</div>
+              </div>
+              <div class="fusion-arrow"></div>
+              <div class="fusion-center">
+                <div style="font-weight: 700; color: var(--brand-gold); font-size: 0.9rem;">Logos Core</div>
+                <div style="font-size: 0.75rem; margin-top: 5px; color: var(--text-muted);">Compliance Synthesis</div>
+              </div>
+              <div class="fusion-arrow"></div>
+              <div class="fusion-node" style="border-color: var(--brand-gold);">Audit Defense Portfolio</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 6: CPA CONNECT -->
+      <div class="slide" data-slide="6">
+        <span class="slide-subtitle">The Execution Layer</span>
+        <h2 class="slide-title">A Secure Marketplace & CPA Platform</h2>
+        <div class="grid-2">
+          <div>
+            <div class="flow-step" style="background: transparent; border: none; padding: 0;">
+              <div class="flow-num" style="background: var(--brand-cream); color: var(--bg-dark);">A</div>
+              <div>
+                <strong style="color: var(--brand-cream); font-size: 1.1rem;">Strategy-Driven Matches</strong>
+                <p>Owners click "Find CPA" from an Enchiridion strategy page, matching them with experts matching their specific tax needs.</p>
+              </div>
+            </div>
+            <div style="height: 20px;"></div>
+            <div class="flow-step" style="background: transparent; border: none; padding: 0;">
+              <div class="flow-num" style="background: var(--brand-cream); color: var(--bg-dark);">B</div>
+              <div>
+                <strong style="color: var(--brand-cream); font-size: 1.1rem;">Embedded Professional Standards</strong>
+                <p>CPA Platform handles client conflict screening, formal engagement letters, and Form 2848/8821 generation automatically.</p>
+              </div>
+            </div>
+            <div style="height: 20px;"></div>
+            <div class="flow-step" style="background: transparent; border: none; padding: 0;">
+              <div class="flow-num" style="background: var(--brand-cream); color: var(--bg-dark);">C</div>
+              <div>
+                <strong style="color: var(--brand-cream); font-size: 1.1rem;">B2B White-Label Distribution</strong>
+                <p>Registered accounting firms utilize the platform under their own logo, offering Logos-powered optimization checks to standard clients.</p>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="card">
+              <h3 style="margin-bottom: 10px;">The CPA Portal Interface</h3>
+              <p style="margin-bottom: 20px; font-size: 0.95rem;">Designed specifically for CPAs to manage requests, review client records (with scoped credentials), and file events to the Ledger.</p>
+              <div style="border-top: 1px solid var(--border-color); padding-top: 15px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.85rem;">
+                  <span>Engagement Letters Uploaded</span>
+                  <span style="color: var(--accent-green);">Active</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+                  <span>Revocable Client Connections</span>
+                  <span style="color: var(--brand-gold);">Enabled</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 7: BUSINESS MODEL -->
+      <div class="slide" data-slide="7">
+        <span class="slide-subtitle">Business Model</span>
+        <h2 class="slide-title">Four-Tier Subscriptions & Entitlements</h2>
+        <div style="margin-top: 20px;">
+          <table class="pricing-table">
+            <thead>
+              <tr>
+                <th>Tier</th>
+                <th>Price / Mo</th>
+                <th>Core Capabilities Included</th>
+                <th>Target Segment</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Free</strong></td>
+                <td>$0</td>
+                <td>Conversational Q&A, basic transaction flags, general audit warnings.</td>
+                <td>Self-Employed, Sole Props</td>
+              </tr>
+              <tr class="pricing-highlight">
+                <td><strong>Professional</strong></td>
+                <td><strong style="color: var(--brand-gold);">$299</strong></td>
+                <td>Citadel sync (Plaid/QBO), Enchiridion Playbook access, CPA matching, tax planning.</td>
+                <td>LLCs, Active S-Corps</td>
+              </tr>
+              <tr>
+                <td><strong>Business Pro</strong></td>
+                <td>Custom</td>
+                <td>Multi-entity strategies, state optimization, payroll compensation reviews.</td>
+                <td>Multi-Entity Owners</td>
+              </tr>
+              <tr>
+                <td><strong>Enterprise</strong></td>
+                <td>Custom</td>
+                <td>API keys, firm CRM, white-label client dashboards, custom document storage.</td>
+                <td>CPA Firms, Advisors</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- SLIDE 8: ECONOMICS & ROI -->
+      <div class="slide" data-slide="8">
+        <span class="slide-subtitle">ROI & Unit Economics</span>
+        <h2 class="slide-title">Disrupting High-Fee Advisory Retainers</h2>
+        <div class="grid-3" style="margin-top: 20px;">
+          <div class="card" style="text-align: center;">
+            <div class="card-metric">10k%</div>
+            <h3>Return on Investment</h3>
+            <p>Traditional corporate advisory costs **$15k - $35k** and takes 4 weeks. Logos achieves matching optimization in **30 seconds** for **$299/mo**.</p>
+          </div>
+          <div class="card" style="text-align: center;">
+            <div class="card-metric">$50k+</div>
+            <h3>Estimated Client LTV</h3>
+            <p>Reflects continuous entrepreneur subscription cycles across business growth, entity formations, and CPA matches.</p>
+          </div>
+          <div class="card" style="text-align: center;">
+            <div class="card-metric">&lt;5%</div>
+            <h3>Projected Monthly Churn</h3>
+            <p>The Ledger timeline locks in client tax history, making switching off the platform incredibly complex.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 9: MARKET OPPORTUNITY -->
+      <div class="slide" data-slide="9">
+        <span class="slide-subtitle">Market Size</span>
+        <h2 class="slide-title">The $15 Billion Opportunity</h2>
+        <div class="grid-2">
+          <div>
+            <p style="font-size: 1.25rem; margin-bottom: 25px;">
+              SMB owners are trapped between basic tax-prep filing software (TurboTax, H&R Block) and high-cost personal advisory firms.
+            </p>
+            <div style="background-color: var(--bg-panel); padding: 25px; border-radius: 8px; border: 1px solid var(--border-color);">
+              <h3 style="font-size: 1.2rem; margin-bottom: 10px;">Primary Target SOM</h3>
+              <p style="margin-bottom: 15px;">**U.S. S-Corps, Biotech software founders, and SaaS entities** with annual revenues between $200K and $5M. High-margin tax strategies (QSBS, R&D credits) are critical for these entities.</p>
+              <div style="height: 1px; background-color: var(--border-color); margin: 15px 0;"></div>
+              <p style="font-size: 0.95rem; color: var(--brand-gold);">CPAs represent a second distribution network, serving as referrals and white-label purchasers.</p>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; justify-content: center; gap: 20px;">
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 20px; border-radius: 8px; text-align: right;">
+              <span style="font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase;">TAM (Total Market)</span>
+              <div style="font-size: 2.8rem; font-weight: 700; color: var(--brand-cream); font-family: var(--font-serif);">$15.0 Billion</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 20px; border-radius: 8px; text-align: right; border-left: 3px solid var(--brand-gold);">
+              <span style="font-size: 0.9rem; color: var(--brand-gold); text-transform: uppercase;">SAM (U.S. SMB Tax Optimization)</span>
+              <div style="font-size: 2.8rem; font-weight: 700; color: var(--brand-gold); font-family: var(--font-serif);">$4.2 Billion</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 10: FOUNDER -->
+      <div class="slide" data-slide="10">
+        <span class="slide-subtitle">The Team</span>
+        <h2 class="slide-title">Founded on Domain Expertise & Personal Mission</h2>
+        <div class="grid-2" style="align-items: center;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 25px; margin-bottom: 25px;">
+              <div class="founder-image-placeholder">
+                <span style="color: var(--brand-gold); font-size: 2.5rem; font-weight: 700; font-family: var(--font-serif);">DG</span>
+              </div>
+              <div>
+                <h3 style="color: var(--brand-cream); font-size: 1.8rem; margin-bottom: 5px;">David Gillilan</h3>
+                <p style="color: var(--brand-gold); font-size: 1.05rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Founder & CEO</p>
+              </div>
+            </div>
+            <ul style="list-style: none; font-size: 1.05rem;">
+              <li style="margin-bottom: 12px;">• 20+ years of enterprise growth and strategic business development.</li>
+              <li style="margin-bottom: 12px;">• Executive Education: Northwestern University's Kellogg School of Management.</li>
+              <li style="margin-bottom: 12px;">• Former Director of Business Development at a top Texas CPA firm.</li>
+              <li style="margin-bottom: 12px;">• Candidate for IRS Enrolled Agent (EA) status.</li>
+            </ul>
+          </div>
+          <div>
+            <div class="founder-story-quote">
+              "My father, an Air Force officer and business founder, passed away suddenly when he was 37. My mother was forced to rebuild her business from scratch with zero financial guidance. I built Logos to ensure no hard-working entrepreneur is ever left in the dark."
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 11: ROADMAP -->
+      <div class="slide" data-slide="11">
+        <span class="slide-subtitle">Traction & Timeline</span>
+        <h2 class="slide-title">Traction, Architecture, & Roadmap</h2>
+        <div class="grid-2">
+          <div>
+            <h3 style="font-size: 1.25rem; color: var(--brand-gold); margin-bottom: 15px;">Completed Architecture</h3>
+            <ul style="list-style: none;">
+              <li style="margin-bottom: 10px; display: flex; gap: 8px;">
+                <span style="color: var(--accent-green);">✔</span>
+                <span>Modular `ITaxStrategy` calculators configured for active use.</span>
+              </li>
+              <li style="margin-bottom: 10px; display: flex; gap: 8px;">
+                <span style="color: var(--accent-green);">✔</span>
+                <span>Four distinct repos configured with Sentry & PostHog telemetry integrations.</span>
+              </li>
+              <li style="margin-bottom: 10px; display: flex; gap: 8px;">
+                <span style="color: var(--accent-green);">✔</span>
+                <span>CPA Marketplace & Client Matching database migrations implemented.</span>
+              </li>
+              <li style="margin-bottom: 10px; display: flex; gap: 8px;">
+                <span style="color: var(--accent-green);">✔</span>
+                <span>Full-page conversational AI Advisor (Logos) client interface.</span>
+              </li>
+            </ul>
+          </div>
+          
+          <div style="border-left: 1px solid var(--border-color); padding-left: 40px;">
+            <h3 style="font-size: 1.25rem; color: var(--brand-gold); margin-bottom: 15px;">Future Development</h3>
+            <div style="position: relative; padding-left: 20px;">
+              <div style="position: absolute; left: 0; top: 8px; width: 8px; height: 8px; border-radius: 50%; background: var(--brand-gold);"></div>
+              <strong style="color: var(--brand-cream); font-size: 0.95rem;">Phase 3: Deep Portal Enhancements</strong>
+              <p style="font-size: 0.9rem; margin-bottom: 15px;">Integrate user activities metrics, global admin search controls, and unified dashboard tools.</p>
+            </div>
+            <div style="position: relative; padding-left: 20px;">
+              <div style="position: absolute; left: 0; top: 8px; width: 8px; height: 8px; border-radius: 50%; background: var(--brand-gold);"></div>
+              <strong style="color: var(--brand-cream); font-size: 0.95rem;">Phase 4: Omnichannel & AI Analytics</strong>
+              <p style="font-size: 0.9rem;">SMS strategy notification pipelines and automated receipt/mileage logging integrations.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 12: THE ASK -->
+      <div class="slide" data-slide="12">
+        <div style="text-align: center; max-width: 800px; margin: 0 auto;">
+          <span class="slide-subtitle">Fundraising</span>
+          <h2 class="slide-title" style="font-size: 3.5rem; margin-bottom: 30px;">Raising $2.5M Seed Capital</h2>
+          <div class="grid-3" style="margin-bottom: 40px;">
+            <div style="background-color: var(--bg-panel); padding: 20px; border-radius: 8px; border: 1px solid var(--border-color);">
+              <div style="font-size: 2.2rem; font-weight: 700; color: var(--brand-gold); font-family: var(--font-serif); margin-bottom: 8px;">60%</div>
+              <strong style="color: var(--brand-cream);">AI & Core Development</strong>
+              <p style="font-size: 0.85rem; margin-top: 5px;">Expand automated compliance orchestration and legal database matching capabilities.</p>
+            </div>
+            <div style="background-color: var(--bg-panel); padding: 20px; border-radius: 8px; border: 1px solid var(--border-color);">
+              <div style="font-size: 2.2rem; font-weight: 700; color: var(--brand-gold); font-family: var(--font-serif); margin-bottom: 8px;">25%</div>
+              <strong style="color: var(--brand-cream);">Marketplace Expansion</strong>
+              <p style="font-size: 0.85rem; margin-top: 5px;">Grow the vetted CPA partnership directory and launch targeted sales acquisitions.</p>
+            </div>
+            <div style="background-color: var(--bg-panel); padding: 20px; border-radius: 8px; border: 1px solid var(--border-color);">
+              <div style="font-size: 2.2rem; font-weight: 700; color: var(--brand-gold); font-family: var(--font-serif); margin-bottom: 8px;">15%</div>
+              <strong style="color: var(--brand-cream);">Operations & Licensing</strong>
+              <p style="font-size: 0.85rem; margin-top: 5px;">Secure direct tax database access partnerships and regulatory compliance audits.</p>
+            </div>
+          </div>
+          <p style="font-size: 1.25rem; color: var(--brand-cream);">
+            David Gillilan, Founder & CEO &nbsp; | &nbsp; support@logostaxsystems.com &nbsp; | &nbsp; logostaxsystems.com
+          </p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- SPEAKER NOTES DRAWER -->
+    <div class="notes-drawer" id="notesDrawer">
+      <div class="notes-title" id="notesTitle">Speaker Notes</div>
+      <div class="notes-content" id="notesContent">
+        Slide 1 Notes: Welcome and introduction to Logos Tax Systems...
+      </div>
+    </div>
+
+    <!-- CONTROLS FOOTER -->
+    <div class="deck-controls">
+      <div class="slide-counter" id="slideCounter">SLIDE 1 OF 12</div>
+      
+      <div class="nav-buttons">
+        <button class="nav-btn notes-btn notes-toggle" id="toggleNotesBtn">Toggle Speaker Notes (N)</button>
+        <button class="nav-btn" id="prevBtn" disabled>Previous</button>
+        <button class="nav-btn" id="nextBtn">Next</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- JAVASCRIPT FOR PRESENTATION LOGIC -->
+  <script>
+    // Slide Data & Speaker Notes
+    const notes = {
+      1: "Welcome investors. Set the baseline: Logos is NOT a standard tax preparer like TurboTax, and it's NOT a traditional CPA firm. We are a portable tax operating system. Our mission is to shift control of tax history from accounting databases back to the business owner.",
+      2: "Address the pain point: CPAs hold all strategic context. This creates client lock-in. If a business owner leaves, the next professional must start from zero. Rebuilding that context is costly and results in missed deductions.",
+      3: "Introduce our core innovation: Data portability. Business owners own their tax profile, records, and plans. They grant scoped, temporary access to CPAs. Handoffs are seamless and friction-free.",
+      4: "Describe the product design pillars: Citadel feeds raw entries into the platform; Logos acts as the continuous AI strategist; Enchiridion packages opportunities into actionable playbooks; Ledger records CPA executions; Vault secure houses original documents.",
+      5: "Highlight the compliance 'secret sauce' engineering moat. Point out the live IRS transcript pulls, the database of 10,000 legal precedents, and the automated risk checking before files are generated. This makes our recommendations audit-defended and highly compliant.",
+      6: "Describe the execution layer. Business owners matching with CPAs are pre-filtered based on strategies like S-Corp setup. We embed professional standard steps (letters, Form 2848) into the platform, and support white-label B2B firm branding.",
+      7: "Review monetization: A gated framework. The Free tier offers general advice; the $299/mo Professional tier unlocks bank integrations, estimates, and CPA matching. Custom and Enterprise tiers serve CPA agencies.",
+      8: "The financial comparison: 10,000% ROI. Standard tax planning costs $15K-$35K and takes 4 weeks. Logos achieves optimization in 30 seconds for $299/mo. Churn is predicted under 5% because the Ledger forms an essential permanent timeline.",
+      9: "Break down the TAM: A $15 billion market opportunity. Highlight our focus on the U.S. S-Corp and biotech startups segment (SOM: $800M). These customers have complex strategic tax needs but lack direct in-house support.",
+      10: "Explain the team pedigree. David Gillilan brings 20+ years of growth leadership and CPA firm bd execution. Address the personal mission: David's father passed away suddenly when he was 37, and his mother had to rebuild with no guidance. This is why he founded Logos.",
+      11: "Review current traction. This is not a concept. Explain that modular strategies are operational, Sentry/PostHog observability is active, and our multi-repo platform is fully structured and running. Outline future phases.",
+      12: "The Ask: $2.5M Seed round. Explain the allocation: 60% engineering/AI, 25% marketplace expansion, and 15% operations and licensing. Invite questions from the room."
+    };
+
+    let currentSlide = 1;
+    const totalSlides = 12;
+    let notesOpen = false;
+
+    // DOM Elements
+    const slides = document.querySelectorAll('.slide');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const toggleNotesBtn = document.getElementById('toggleNotesBtn');
+    const notesDrawer = document.getElementById('notesDrawer');
+    const notesContent = document.getElementById('notesContent');
+    const slideCounter = document.getElementById('slideCounter');
+    const progressBar = document.getElementById('progressBar');
+
+    // Update Slide UI
+    function updateSlide() {
+      // Manage Active Classes
+      slides.forEach(slide => {
+        const slideNum = parseInt(slide.getAttribute('data-slide'));
+        slide.classList.remove('active', 'previous');
+        
+        if (slideNum === currentSlide) {
+          slide.classList.add('active');
+        } else if (slideNum < currentSlide) {
+          slide.classList.add('previous');
+        }
+      });
+
+      // Enable/Disable buttons
+      prevBtn.disabled = currentSlide === 1;
+      nextBtn.disabled = currentSlide === totalSlides;
+
+      // Update counters & progress bar
+      slideCounter.innerText = `SLIDE ${currentSlide} OF ${totalSlides}`;
+      const fillPercentage = ((currentSlide - 1) / (totalSlides - 1)) * 100;
+      progressBar.style.width = `${fillPercentage}%`;
+
+      // Update Speaker Notes
+      notesContent.innerHTML = notes[currentSlide];
+      document.getElementById('notesTitle').innerText = `Speaker Notes — Slide ${currentSlide}`;
+    }
+
+    // Navigation triggers
+    function navigateNext() {
+      if (currentSlide < totalSlides) {
+        currentSlide++;
+        updateSlide();
+      }
+    }
+
+    function navigatePrev() {
+      if (currentSlide > 1) {
+        currentSlide--;
+        updateSlide();
+      }
+    }
+
+    function toggleNotes() {
+      notesOpen = !notesOpen;
+      if (notesOpen) {
+        notesDrawer.classList.add('open');
+        toggleNotesBtn.classList.add('active');
+      } else {
+        notesDrawer.classList.remove('open');
+        toggleNotesBtn.classList.remove('active');
+      }
+    }
+
+    // Event Listeners
+    nextBtn.addEventListener('click', navigateNext);
+    prevBtn.addEventListener('click', navigatePrev);
+    toggleNotesBtn.addEventListener('click', toggleNotes);
+
+    // Keyboard controls
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        e.preventDefault();
+        navigateNext();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault();
+        navigatePrev();
+      } else if (e.key === 'n' || e.key === 'N') {
+        e.preventDefault();
+        toggleNotes();
+      }
+    });
+
+    // Initialize
+    updateSlide();
+  </script>
+
+</body>
+</html>
