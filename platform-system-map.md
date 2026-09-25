@@ -1,5 +1,5 @@
 # Logos Tax Systems — Platform System Map
-_Last updated: 2026-06-23_
+_Last updated: 2026-08-13_
 
 Comprehensive Mermaid map of **all repos**, **features/modules**, and **data flows**. This is the successor to the original monolithic `taxpert-architecture.md` diagram.
 
@@ -19,28 +19,36 @@ graph TB
     end
 
     subgraph FE [Front-End Layer]
-        subgraph WEB [TT-website — Next.js 16 · :3002]
+        subgraph WEB [logos-website — Next.js 16 · :3002]
             WEB_HOME[/ — marketing homepage]
             WEB_PROD[/product /for-cpas /pricing /faq /about]
+            WEB_BLOG[/blog — 6 posts: S-Corp CPAs Deductions\nSwitching CPAs Document Lifecycle etc.]
             WEB_LEGAL[/legal/privacy /legal/eula]
             WEB_WAIT[/api/waitlist — Brevo]
             WEB_CHAT[/api/chat — pre-sales]
+            WEB_COMMUNITY[/community — Community Agent\npublic demo chat · 2-turn limit\nlead-capture form · anon session]
             WEB_KNOW[src/data/product-knowledge.ts]
+            WEB_SENTRY[Sentry + PostHog instrumentation]
         end
 
-        subgraph TT [taxpert-therapy — Next.js 14 · :3003]
+        subgraph TT [logos-app — Next.js 14 · :3003]
             TT_AUTH[Auth and Onboarding\n/login /signup /onboarding/step1-3\n/auth-callback /password-reset]
-            TT_PILLARS[Five Pillars\n/citadel /enchiridion\n/ledger /vault]
-            TT_DASH[Dashboard\n/dashboard — journey home\nConversationFirstDashboard]
+            TT_PILLARS[Five Pillars — gated\n/citadel FeatureGate\n/enchiridion metered gating\n  first strategy shown locked rest blurred\n/ledger /vault]
+            TT_DASH[Dashboard\n/dashboard — BusinessOwnerDashboard\nEstimated Opportunity hero\n5 pillar cards · contextual CTA]
             TT_LOGOS_PAGE[Logos full page\n/logos /logos/history\n/logos/session/id]
             TT_WIDGET[LogosWidget\nfloating chat in layout.tsx\nhidden on /strategies /logos /onboarding]
-            TT_STRAT[Strategy agent\n/strategies /strategies/id]
-            TT_ENG[CPA Engagement\n/dashboard/my-cpas\n/api/engagement/requests|end]
-            TT_SUB[Subscription\n/dashboard/subscription\n/api/stripe/*]
-            TT_INT[Integrations UI\n/dashboard/quickbooks\n/dashboard/bank-analysis\n/api/plaid/* /api/qbo/*]
-            TT_ADMIN[Admin\n/admin /cpa-admin]
+            TT_STRAT[Strategy agent\n/strategies /strategies/id\nrate limited + auth]
+            TT_ENG[CPA Engagement\n/dashboard/my-cpas\n/dashboard/find-advisor browse + detail\n/api/engagement/request|advisor]
+            TT_ACCT[Account Settings — dashboard/(account)/\nprofile · subscription · settings\nnotifications · security · privacy\ndata-sharing · usage · support]
+            TT_SUP[Support Tickets\n/api/support — create list get reply\nEnchiridion thread view + reply]
+            TT_SMS[SMS Channel — AG-1\n/api/sms/inbound Twilio webhook\n/api/sms/link-phone — E.164 link\nlib/sms/twilio.ts · TCPA opt-in]
+            TT_CAL[Tax Calendar\n/dashboard/calendar\nVercel cron daily reminders\ndynamic tax_deadlines table]
+            TT_WF[Workflows\n/api/workflows]
+            TT_INT[Integrations UI\n/dashboard/quickbooks\n/dashboard/bank-analysis\n/api/plaid/* BFF /api/qbo/*]
             TT_BFF[BFF API Routes\n/api/tax-advisor/*\n/api/logos/* /api/v1/*\n/api/webhooks/*]
             TT_SDK[lib/apiCoreClientEnhanced.ts\nwraps packages/sdk]
+            TT_PLAID_BFF[lib/tt-core/plaid-bff.ts\nPlaid BFF layer]
+            TT_DEMO[lib/demoMode.ts]
 
             subgraph LOGOS_LIB [lib/logos — Document Parser]
                 DOC_EXTRACT[documentExtractor.ts\nrule-based then Claude Haiku]
@@ -50,27 +58,48 @@ graph TB
                 CTX_ASSEM[contextAssembler.ts]
                 PII_CLEAN[sanitizePii.ts]
                 LOGOS_CTX_SVC[logosContext.service.ts\npatchUserTaxContext]
+                VAULT_VALID[validateClaim.ts — Haiku content-claim\nentity extraction · fact reconciliation\nvault_document_extractions table]
             end
         end
 
-        subgraph CPA_FE [TT-cpa-platform — Next.js 16 · :3001]
+        subgraph CPA_FE [logos-cpa — Next.js 16 · :3001]
             CPA_LAND[/ — marketing landing]
             CPA_AUTH[Auth /login /signup]
             CPA_DASH[Dashboard\n/dashboard stats requests clients]
-            CPA_CRM[FirmClients CRM\n/dashboard/clients/id notes]
+            CPA_CRM[FirmClients CRM\n/dashboard/clients/id notes\nClientDocuments engagement letter upload\nClientTaxProfile BO profile tab]
+            CPA_LOGOS[Ask Logos tab\ncpa-chat endpoint · Bearer token\nlocked when context not granted]
+            CPA_ACCESS[context_access_granted toggle\ngates Tax Profile + Ask Logos]
             CPA_REQ[Request Queue\n/dashboard/requests accept decline]
             CPA_RET[Tax Return Kanban\n/dashboard/returns 9 columns]
             CPA_EARN[Earnings /dashboard/earnings]
             CPA_MKT[Marketplace\n/marketplace /marketplace/cpaId]
             CPA_PROFILE[Firm Profile /dashboard/profile branding]
+            CPA_DOCS[Client Documents\nengagement letter upload\nprivate storage bucket]
             CPA_API[API Routes\n/api/clients /api/requests\n/api/returns /api/handoffs/sync\n/api/marketplace /api/qbo]
             CPA_MOD[src/modules identity clients returns]
-            CPA_CORE[lib/tt-core proxy to TT-api-core]
+            CPA_CORE[lib/tt-core proxy to logos-backend]
+            CPA_OBS[Sentry + PostHog instrumentation]
+        end
+
+        subgraph ADM_FE [logos-admin — Next.js 16 · :3004]
+            ADM_OVERVIEW[/overview metrics]
+            ADM_ORGS[/orgs — paginated + filters\nOrgDetailPanel feature flags\nplan feature defaults + overrides]
+            ADM_USERS[/users deactivate revoke-tokens]
+            ADM_AUDIT[/audit — date range actor entity filters]
+            ADM_ENG[/engagements inspector]
+            ADM_CPAS[/cpas — CPA list + /cpas/:id detail\nprofile engagements verification tabs]
+            ADM_SUPPORT[/support — SupportQueuePanel\nTicketDetailPanel threaded messages\nstatus priority Linear escalation]
+            ADM_HEALTH[/health — System Health dashboard\n10 targets · GCP identity tokens\nparallel-fetch · dev+prod]
+            ADM_LEADS[/community-leads — ADM-7\nadmin visibility for community leads]
+            ADM_RBAC[/settings/admins platform_role]
+            ADM_ARCH[/architecture — embedded architecture viewer]
+            ADM_BFF[BFF /api/admin/* → logos-backend /admin/*\n/api/support/* → logos-backend support module]
+            ADM_OBS[Sentry + PostHog instrumentation]
         end
     end
 
     subgraph BE [Back-End Layer]
-        subgraph CORE [TT-api-core — NestJS Monorepo · :8085]
+        subgraph CORE [logos-backend — NestJS Monorepo · :8085]
             CORE_AUTH[auth — JWT blacklist guards]
             CORE_ORGS[orgs — multi-tenant]
             CORE_WS[workspaces]
@@ -97,9 +126,17 @@ graph TB
             CORE_HEALTH[health]
 
             subgraph SHARED [packages]
-                PKG_CORE[packages/core types enums plans]
+                PKG_CORE[packages/core types enums plans\nstrategyPreviewLimit in catalog]
                 PKG_SDK[packages/sdk generated client]
             end
+            CORE_SENTRY[Sentry error tracking\nwith profiling in main.ts]
+            CORE_POSTHOG[PostHog analytics service\ncapture identify groupIdentify]
+            CORE_CONFIDENCE[logos-confidence guard\nLogosConfidenceGuard]
+            CORE_UTX[user-tax-context service\nin logos module]
+            CORE_CLOUDRUN[cloud-run-auth.ts\nOIDC + service token split]
+            CORE_SUPPORT[support module\ntickets category priority escalate\nstats endpoint for admin\nLinear escalation]
+            CORE_LEADS[community-leads module — BE-5\ndurable storage · ingestion API\nCOMMUNITY_LEADS tier · adminListLeads]
+            CORE_ENC[SEC-1 encryption\nversioned AES-256-GCM envelope\nsalt-to-env · re-encryption migration]
 
             subgraph STRAT_ENG [logos/strategies — TypeScript NOT RAG]
                 SE_ALL[Augusta S-Corp QBI Bonus Depreciation\nHiring Children Family Employment\nRetirement Cost Seg RE Pro Health Acct Plan]
@@ -108,7 +145,7 @@ graph TB
             end
         end
 
-        subgraph QBO_SVC [TT-cpa-platform/qbo-service]
+        subgraph QBO_SVC [logos-cpa/qbo-service]
             QBO_SYNC[QBOSyncService]
             QBO_WH[WebhookHandler]
             QBO_SCHED[ScheduledJobProcessor]
@@ -117,9 +154,9 @@ graph TB
     end
 
     subgraph AI [AI Agentic Layer]
-        subgraph COPILOT [TT-dev-copilot — ADK + FastAPI]
-            AGENT[root_agent gemini-2.5-flash\ntt_dev_copilot gemini-1.5-flash]
-            LOGOS_ADV[agents/logos-tax-advisor deployable]
+        subgraph COPILOT [logos-agents — ADK + FastAPI]
+            AGENT[root_agent gemini-2.5-flash]
+            LOGOS_ADV[agents/logos-tax-advisor\nVercel/pgvector — not Cloud Run]
 
             subgraph RETRIEVERS [Two RAG Indexes]
                 CODEBASE_RAG[retrievers.py — Codebase Index\ntt-canon architecture workflows]
@@ -132,17 +169,10 @@ graph TB
                 CALC[calculators/augusta_rule.py]
             end
 
-            subgraph DEV_TOOLS [Dev Copilot Tools]
-                GH_TOOLS[github_tools.py]
-                TEST_TOOLS[test_execution_tools.py]
-                DB_TOOLS[database_tools.py]
-                SRV_TOOLS[server_management_tools.py]
-            end
-
             ZENO[zeno_bot.py Slack]
         end
 
-        subgraph MCP_DEV [TT-mcp-server — dev only]
+        subgraph MCP_DEV [logos-mcp — dev only]
             MCP_TOOLS[logos_agent_chat\nTT-api-core proxy]
         end
     end
@@ -161,8 +191,10 @@ graph TB
         ANTHROPIC[Anthropic Claude]
         OPENAI[OpenAI]
         SENTRY[Sentry]
+        POSTHOG[PostHog]
         GCP_LOG[Cloud Logging]
         GITHUB[GitHub API]
+        TWILIO[Twilio SMS]
     end
 
     %% Users to front-ends
@@ -174,10 +206,10 @@ graph TB
     U1 --> TT_WIDGET
     U2 --> CPA_DASH
     U2 --> CPA_CRM
-    U3 --> TT_ADMIN
-    U3 --> CPA_FE
+    U3 --> ADM_OVERVIEW
+    U3 --> ADM_ORGS
 
-    %% TT-website
+    %% logos-website
     WEB_CHAT --> CORE_TAXADV
     WEB_WAIT --> STRIPE_EXT
 
@@ -218,6 +250,15 @@ graph TB
     CPA_API --> CORE_QBO
     CPA_API --> CORE_HANDOFF
 
+    %% Platform admin portal
+    ADM_BFF --> CORE_ADMIN
+    ADM_ORGS --> ADM_BFF
+    ADM_USERS --> ADM_BFF
+    ADM_AUDIT --> ADM_BFF
+    ADM_ENG --> SUPA
+    ADM_CPAS --> SUPA
+    ADM_OVERVIEW --> ADM_BFF
+
     %% Backend internals
     CORE_LOGOS --> CORE_LLM
     CORE_LOGOS --> CORE_THREADS
@@ -255,13 +296,60 @@ graph TB
     AGENT --> STRAT_TOOLS
     STRAT_TOOLS --> CORE_LOGOS
     LOGOS_CTX --> SUPA
-    AGENT --> GH_TOOLS
-    GH_TOOLS --> GITHUB
     MCP_TOOLS -.-> CORE
     MCP_TOOLS -.-> AGENT
 
+    %% Plaid BFF
+    TT_INT --> TT_PLAID_BFF
+    TT_PLAID_BFF --> CORE_PLAID
+
+    %% Account settings + support
+    TT_ACCT --> CORE_AUTH
+    TT_ACCT --> CORE_STRIPE
+    TT_SUP --> CORE_SUPPORT
+    CORE_SUPPORT --> SUPA
+    CORE_SUPPORT --> GITHUB
+
+    %% SMS channel
+    TT_SMS --> TWILIO
+    TT_SMS --> SUPA
+    VAULT_VALID --> ANTHROPIC
+    VAULT_VALID --> SUPA
+
+    %% Community agent
+    WEB_COMMUNITY --> CORE_LEADS
+    CORE_LEADS --> SUPA
+    ADM_LEADS --> ADM_BFF
+    ADM_BFF --> CORE_LEADS
+
+    %% Health dashboard
+    ADM_HEALTH --> GCP_LOG
+
+    %% CPA Logos chat
+    CPA_LOGOS --> TT_BFF
+    CPA_ACCESS --> SUPA
+
+    %% Find-advisor engagement flow
+    TT_ENG --> SUPA
+    TT_ENG --> CORE_CPA
+
+    %% CPA docs
+    CPA_DOCS --> SUPA
+
+    %% Admin support queue
+    ADM_SUPPORT --> ADM_BFF
+    ADM_BFF --> CORE_SUPPORT
+
+    %% New logos-backend wiring
+    CORE_CONFIDENCE --> CORE_LOGOS
+    CORE_UTX --> SUPA
+    CORE_CLOUDRUN --> COPILOT
+    CORE_POSTHOG --> POSTHOG
+    CORE_SENTRY -.-> SUPA
+
     %% Infra monitoring
     SENTRY -.-> TT_AUTH
+    POSTHOG -.-> CORE_LOGOS
     GCP_LOG -.-> COPILOT
 ```
 
@@ -271,12 +359,12 @@ graph TB
 
 | Repo | Port | Domain | Role |
 |------|------|--------|------|
-| TT-website | 3002 | logostaxsystems.com | Marketing, waitlist, pre-sales chat |
-| taxpert-therapy | 3003 | app.logostaxsystems.com | BO app — five pillars, Logos, engagement |
-| TT-cpa-platform | 3001 | cpa.logostaxsystems.com | CPA CRM, kanban, marketplace |
-| TT-api-core | 8085 | Cloud Run | NestJS — all business logic |
-| TT-dev-copilot | — | Cloud Run | ADK agents, dual RAG indexes |
-| TT-mcp-server | — | local dev | Cursor MCP bridge |
+| logos-website | 3002 | logostaxsystems.com | Marketing, waitlist, pre-sales chat |
+| logos-app | 3003 | app.logostaxsystems.com | BO app — five pillars, Logos, engagement |
+| logos-cpa | 3001 | cpa.logostaxsystems.com | CPA CRM, kanban, marketplace |
+| logos-backend | 8085 | Cloud Run | NestJS — all business logic |
+| logos-agents | — | Cloud Run | ADK agents, dual RAG indexes |
+| logos-mcp | — | local dev | Cursor MCP bridge |
 
 ---
 
